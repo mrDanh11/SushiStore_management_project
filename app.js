@@ -3,6 +3,7 @@ const exphbs = require('express-handlebars');
 const session = require('express-session');
 const path = require('path');
 const app = express();
+const sql = require('mssql')
 const PORT = process.env.PORT || 3000;
 
 const Handlebars = require('handlebars');
@@ -44,6 +45,31 @@ app.use('/', viewsRoutes);
 
 // route admin
 adminRoute(app);
+
+const {sqlConfig, poolPromise} = require("./src/config/database");
+
+
+// Kết nối đến SQL Server và thực hiện truy vấn
+async function queryData() {
+  try {
+    await sql.connect(sqlConfig);
+
+    // Truy vấn dữ liệu từ bảng "khach_hang" (hoặc bất kỳ bảng nào trong cơ sở dữ liệu của bạn)
+    const result = await sql.query('SELECT * FROM khach_hang');
+
+    // Hiển thị kết quả truy vấn
+    console.log(result.recordset); // recordset chứa dữ liệu trả về
+
+  } catch (err) {
+    console.error('Error occurred:', err);
+  } finally {
+    // Đóng kết nối
+    await sql.close();
+  }
+}
+
+// Gọi hàm queryData để thực hiện truy vấn
+queryData();
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
