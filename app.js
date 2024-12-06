@@ -68,7 +68,6 @@ async function queryData() {
   }
 }
 
-// Gọi hàm queryData để thực hiện truy vấn
 queryData();
 
 app.listen(PORT, () => {
