@@ -6,13 +6,7 @@ const employeeController = require("../../controllers/admin/employee.controller"
 route.get('/', employeeController.getAllEmployees);
 
 // Thêm nhân viên
-route.get('/add', (req, res) => {
-    res.render('admin/pages/addEmployee', {
-        layout: 'admin_layouts/mainAdmin',
-        title: 'Employee Management',
-        scripts: '<script src="/js/employee.js"></script>',
-    });
-});
+route.get('/add',employeeController.showAddEmployeeForm);
 route.post('/add', employeeController.addEmployee); // Xử lý thêm nhân viên
 
 // Sửa nhân viên

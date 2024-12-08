@@ -8,5 +8,5 @@ module.exports = (app) => {
 
     app.use('/admin/branches', branchesRoute)
 
-    app.use('/admin/employee', employeeRoute)    
+    app.use('/admin/employees', employeeRoute)    
 }
