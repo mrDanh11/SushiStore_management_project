@@ -6,7 +6,7 @@ module.exports.getAllBranches = async (req, res) => {
 
     const poll = await poolPromise;
     const result = await poll.query('SELECT * FROM chi_nhanh');
-    console.log(result.recordset);
+    // console.log(result.recordset);
     res.render('admin/pages/branches', {
       layout: 'admin_layouts/mainAdmin',
       title: 'Branches',

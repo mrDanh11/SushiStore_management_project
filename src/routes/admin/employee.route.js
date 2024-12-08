@@ -16,4 +16,7 @@ route.post('/edit/:id', employeeController.editEmployee); // Xử lý sửa nhâ
 // Xóa nhân viên
 route.post('/delete/:id', employeeController.deleteEmployee); // Xử lý xóa nhân viên
 
+// tìm kiếm nhân viên
+route.get('/search', employeeController.searchEmployee); // Xử lý tìm kiếm nhân viên
+
 module.exports = route;

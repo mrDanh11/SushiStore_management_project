@@ -74,17 +74,59 @@
     text-align: center;
   }
 
-.employee-table th {
-  text-align: center; 
-  background-color: #4CAF50;
-  color: white;
-}
+  .employee-table th {
+    text-align: center;
+    background-color: #4CAF50;
+    color: white;
+  }
 
-.add-employee-btn-container {
-  text-align: center;
-}
+  .add-employee-btn-container {
+    text-align: center;
+  }
 
+  .addEmployee {
+    margin: 15px auto;
+  }
+
+  .add-employee-btn-container {
+    display: flex;
+    /* Dùng flexbox để căn giữa các phần tử */
+    flex-direction: column;
+    /* Sắp xếp theo chiều dọc */
+    align-items: center;
+    /* Căn giữa theo chiều ngang */
+    justify-content: center;
+    /* Căn giữa theo chiều dọc */
+    margin-top: 20px;
+  }
+
+  .add-employee-btn {
+    padding: 12px 24px;
+    /* Điều chỉnh padding cho nút */
+    background-color: #008CBA;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 18px;
+    transition: background-color 0.3s ease;
+    /* Thêm hiệu ứng chuyển màu */
+    display: inline-block;
+    /* Đảm bảo nút là inline block */
+  }
+
+  .add-employee-btn:hover {
+    background-color: #006f8a;
+    /* Thay đổi màu khi hover */
+  }
+
+  .add-employee-btn-container label {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
 </style>
+
+
 
 <!-- Admin Dashboard - index.hbs -->
 <div class="flex">
@@ -102,9 +144,23 @@
         <th>Department</th>
         <th>Branch</th>
         <th>Actions</th>
-        <th>
+        <th colspan="2">
           <div class="add-employee-btn-container">
-            <a href="/admin/employees/add" class="add-employee-btn">Add </a>
+            <label for="addEmployee">Add Employee:</label>
+            <a href="/admin/employees/add" class="add-employee-btn">Add</a>
+          </div>
+        </th>
+
+        <th>
+          <div class="header">
+            <form action="/admin/employees/search" method="GET">
+              <div class="form-group">
+                <label for="searchTerm">Search Employee:</label>
+                <input type="text" id="searchTerm" name="searchTerm" class="form-control"
+                  placeholder="Enter Code and Name Of Employee" value="{{searchTerm}}">
+              </div>
+              <button type="submit" class="btn">Tìm kiếm</button>
+            </form>
           </div>
         </th>
       </tr>
@@ -135,13 +191,82 @@
     <a href="/admin/employees/add" class="add-employee-btn">Add New Employee</a>
   </div> --}}
 
-
-
 </div>
 
 
+
+{{!--
+<!-- Hiển thị danh sách nhân viên -->
+<h3>Danh Sách Nhân Viên</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Mã NV</th>
+      <th>Họ Tên</th>
+      <th>Địa chỉ</th>
+      <th>Chi Nhánh</th>
+      <th>Bộ Phận</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each employees}}
+    <tr>
+      <td>{{MaNV}}</td>
+      <td>{{HoTen}}</td>
+      <td>{{SoNha}}, {{Duong}}, {{Quan}}, {{ThanhPho}}</td>
+      <td>{{ChiNhanh}}</td>
+      <td>{{BoPhan}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table> --}}
+
+<style>
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group input {
+    width: 150px;
+    margin-top: 15px;
+    padding: 8px;
+    /* Thêm padding cho input */
+    font-size: 14px;
+    /* Đảm bảo kích thước chữ hợp lý */
+    color: black;
+    /* Màu chữ đen để dễ đọc */
+    border: 1px solid #ccc;
+    /* Thêm border cho input */
+    border-radius: 4px;
+    /* Góc bo tròn cho input */
+  }
+
+  .form-group input::placeholder {
+    color: #999;
+    /* Màu placeholder xám nhạt */
+  }
+
+  .btn {
+    padding: 8px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    /* Góc bo tròn cho nút */
+  }
+
+  .btn:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+
+
+
+
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     const dateCells = document.querySelectorAll('.date-cell'); // Lấy tất cả các ô có class là 'date-cell'
 
     dateCells.forEach(cell => {

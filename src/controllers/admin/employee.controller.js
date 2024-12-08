@@ -53,7 +53,7 @@ module.exports.showAddEmployeeForm = async (req, res) => {
     }
 };
 
-// Cập nhật controller để xử lý thêm nhân viên
+
 module.exports.addEmployee = async (req, res) => {
     const { MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, NgaySinh, Phai, BoPhan, ChiNhanh } = req.body;
 
@@ -66,7 +66,7 @@ module.exports.addEmployee = async (req, res) => {
     try {
         const pool = await sql.connect(sqlConfig);
 
-        // Thực hiện thêm nhân viên
+        
         await pool.request()
             .input('MaNV', sql.NVarChar, MaNV)
             .input('HoTen', sql.NVarChar, HoTen)
@@ -83,7 +83,6 @@ module.exports.addEmployee = async (req, res) => {
                 VALUES (@MaNV, @HoTen, @SoNha, @Duong, @Quan, @ThanhPho, @NgaySinh, @Phai, @BoPhan, @ChiNhanh)
             `);
 
-        // Chuyển hướng về trang danh sách nhân viên
         res.redirect('/admin/employees');
     } catch (error) {
         console.error(error);
@@ -91,62 +90,6 @@ module.exports.addEmployee = async (req, res) => {
     }
 };
 
-
-
-//------------------------------------------------------------------------------------------
-// // Cập nhật controller để truyền dữ liệu vào view
-// module.exports.addEmployee = async (req, res) => {
-//     const { MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, NgaySinh, Phai, BoPhan, ChiNhanh } = req.body;
-
-//     // Kiểm tra dữ liệu đầu vào
-//     if (!MaNV || !HoTen || !SoNha || !Duong || !Quan || !ThanhPho || !NgaySinh || !Phai || !BoPhan || !ChiNhanh) {
-//         // Trả về form kèm theo thông báo lỗi
-//         return res.status(400).send('All fields are required.');
-//     }
-
-//     try {
-//         const pool = await sql.connect(sqlConfig);
-
-//         // Truy vấn bộ phận
-//         const departmentsResult = await pool.request().query('SELECT * FROM bo_phan');
-//         const departments = departmentsResult.recordset;
-
-//         // Truy vấn chi nhánh
-//         const branchesResult = await pool.request().query('SELECT * FROM chi_nhanh');
-//         const branches = branchesResult.recordset;
-
-//         console.log(">>>>>> Bộ phận: ", departments);
-//         console.log(">>>>>> Chi nhánh: ", branches);
-
-//         // Thực hiện thêm nhân viên
-//         await pool.request()
-//             .input('MaNV', sql.NVarChar, MaNV)
-//             .input('HoTen', sql.NVarChar, HoTen)
-//             .input('SoNha', sql.NVarChar, SoNha)
-//             .input('Duong', sql.NVarChar, Duong)
-//             .input('Quan', sql.NVarChar, Quan)
-//             .input('ThanhPho', sql.NVarChar, ThanhPho)
-//             .input('NgaySinh', sql.Date, NgaySinh)
-//             .input('Phai', sql.NVarChar, Phai)
-//             .input('BoPhan', sql.Int, BoPhan)
-//             .input('ChiNhanh', sql.Int, ChiNhanh)
-//             .query(`
-//                 INSERT INTO nhan_vien (MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, NgaySinh, Phai, BoPhan, ChiNhanh)
-//                 VALUES (@MaNV, @HoTen, @SoNha, @Duong, @Quan, @ThanhPho, @NgaySinh, @Phai, @BoPhan, @ChiNhanh)
-//             `);
-
-
-//         res.render('admin/pages/addEmployee', {
-//             layout: 'admin_layouts/mainAdmin',
-//             departments: departments,  
-//             branches: branches        
-//         });
-//     } catch (error) {
-//         console.error('Error adding employee:', error);
-//         res.status(500).send('Error adding employee');
-//     }
-// };
-//-------------------------------------------------------------------------------------
 
 
 
@@ -322,5 +265,36 @@ module.exports.deleteEmployee = async (req, res) => {
         res.status(500).send('Error deleting employee');
     }
 };
+
+
+// tìm kiếm nhân viên
+module.exports.searchEmployee = async (req, res) => {
+    const { searchTerm } = req.query; // Lấy từ query string
+
+    try {
+        const pool = await sql.connect(sqlConfig);
+
+        // Truy vấn tìm kiếm nhân viên với các thông tin có thể tìm kiếm
+        const result = await pool.request()
+            .input('searchTerm', sql.NVarChar, `%${searchTerm}%`) // Dùng '%' để tìm kiếm với từ khóa bất kỳ
+            .query(`
+                SELECT MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, NgaySinh, Phai, BoPhan, ChiNhanh
+                FROM nhan_vien
+                WHERE MaNV LIKE @searchTerm OR HoTen LIKE @searchTerm
+                ORDER BY ChiNhanh ASC
+            `);
+
+        res.render('admin/pages/employees', {
+            layout: 'admin_layouts/mainAdmin',
+            title: 'Employee Management',
+            employees: result.recordset,
+            searchTerm: searchTerm // Truyền từ khóa tìm kiếm về view
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error searching employees');
+    }
+};
+
 
 
