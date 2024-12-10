@@ -128,8 +128,8 @@
     <label for="thanhPho">City:</label>
     <input type="text" id="thanhPho" name="ThanhPho" value="{{employee.ThanhPho}}" required><br><br>
 
-    <label for="ngaySinh">Date of Birth:</label>
-    <input type="date" id="ngaySinh" name="NgaySinh" value="{{employee.NgaySinh}}" required><br><br>
+    {{!--  <label for="ngaySinh">Date of Birth:</label>
+    <input type="date" id="ngaySinh" name="NgaySinh" value="{{employee.NgaySinh}}" required><br><br> --}}
 
     <label for="phai">Gender:</label>
     <select id="phai" name="Phai" required>
@@ -137,28 +137,13 @@
       <option value="Nu" {{#eq employee.Phai "Nu" }}selected{{/eq}}>Female</option>
     </select><br><br>
 
-    {{!-- <div class="form-group">
-      <label for="boPhan">Department:</label>
-      <select id="boPhan" name="BoPhan" required class="form-control">
-        {{#each departments}}
-        <option value="{{MaBoPhan}}">
-          {{MaBoPhan}}
-          {{TenBoPhan}}
-        </option>
-        {{/each}}
-      </select>
-    </div>
+    {{!-- Mức lương --}}
+    {{!-- <label for="luong">Salary:</label>
+    <input type="number" id="luong" name="MucLuong" value="{{employee.Luong}}" required><br><br> --}}
 
-    <div class="form-group">
-      <label for="chiNhanh">Branch:</label>
-      <select id="chiNhanh" name="ChiNhanh" required class="form-control">
-        {{#each branches}}
-        <option value="{{MaCN}}">
-          {{TenCN}}
-        </option>
-        {{/each}}
-      </select>
-    </div> --}}
+  <label for="luong">Salary:</label>
+  <input type="number" id="luong" name="Luong" value="{{employee.Luong}}" required><br><br>
+
 
     <!-- Bộ phận -->
     <div class="form-group">
@@ -189,3 +174,4 @@
     <button type="submit">Save Changes</button>
   </form>
 </div>
+

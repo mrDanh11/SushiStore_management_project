@@ -143,6 +143,7 @@
         <th>Address</th>
         <th>Department</th>
         <th>Branch</th>
+        <th>Luong</th>
         <th>Actions</th>
         <th colspan="2">
           <div class="add-employee-btn-container">
@@ -176,6 +177,7 @@
         <td>{{this.SoNha}}, {{this.Duong}}, {{this.Quan}}, {{this.ThanhPho}}</td>
         <td>{{this.BoPhan}}</td>
         <td>{{this.ChiNhanh}}</td>
+        <td>{{this.Luong}}</td>
         <td>
           <a href="/admin/employees/edit/{{this.MaNV}}" class="action-btn edit-btn">Edit</a>
           <form action="/admin/employees/delete/{{this.MaNV}}" method="post" style="display:inline;">

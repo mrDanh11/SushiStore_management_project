@@ -1,0 +1,230 @@
+<style>
+    /* General Styles */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        color: #007bff;
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    .report-container {
+        width: 80%;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Tabs */
+    .tabs {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .tabs button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        margin: 0 5px;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .tabs button:hover {
+        background-color: #0056b3;
+    }
+
+    .tabs button.active {
+        background-color: #0056b3;
+    }
+
+    /* Tab content */
+    .tabcontent {
+        display: none;
+        padding-top: 20px;
+    }
+
+    /* Active tab content */
+    .tabcontent.active {
+        display: block;
+    }
+
+    /* Table Styles */
+    .table-container {
+        margin-top: 20px;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #007bff;
+        color: white;
+    }
+
+    td {
+        background-color: #fafafa;
+    }
+
+    tr:nth-child(even) td {
+        background-color: #f9f9f9;
+    }
+
+    tr:hover td {
+        background-color: #f1f1f1;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .pagination a {
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        color: #007bff;
+        text-decoration: none;
+        margin: 0 2px;
+    }
+
+    .pagination a:hover {
+        background-color: #f1f1f1;
+    }
+
+    .pagination a.active {
+        background-color: #007bff;
+        color: white;
+    }
+</style>
+
+
+<!-- Admin Dashboard - reports.hbs -->
+<div class="flex">
+    <!-- Sidebar -->
+    {{> admin_partials/sidebar}}
+
+    <div class="report-container">
+
+        <h1>Revenue Report</h1>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tablinks" onclick="openTab(event, 'monthly')">Monthly</button>
+            <button class="tablinks" onclick="openTab(event, 'quarterly')">Quarterly</button>
+            <button class="tablinks" onclick="openTab(event, 'yearly')">Yearly</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="monthly" class="tabcontent">
+            <form action="/admin/reports/monthly" method="get">
+                <label for="month">Select Month:</label>
+                <select name="month" id="month">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+                <button type="submit">View Report</button>
+            </form>
+
+            <!-- Monthly Report Table -->
+            <div class="table-container">
+                <!-- Render table here -->
+            </div>
+        </div>
+
+        <div id="quarterly" class="tabcontent">
+            <form action="/admin/reports/quarterly" method="get">
+                <label for="quarter">Select Quarter:</label>
+                <select name="quarter" id="quarter">
+                    <option value="1">Q1</option>
+                    <option value="2">Q2</option>
+                    <option value="3">Q3</option>
+                    <option value="4">Q4</option>
+                </select>
+                <button type="submit">View Report</button>
+            </form>
+
+            <!-- Quarterly Report Table -->
+            <div class="table-container">
+                <!-- Render table here -->
+            </div>
+        </div>
+
+        <div id="yearly" class="tabcontent">
+            <form action="/admin/reports/yearly" method="get">
+                <label for="year">Select Year:</label>
+                <select name="year" id="year">
+                    <option value="2020">2020</option>
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                </select>
+                <button type="submit">View Report</button>
+            </form>
+
+            <!-- Yearly Report Table -->
+            <div class="table-container">
+                <!-- Render table here -->
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
+
+<script>
+    // Handle tab switching
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].classList.remove("active");
+        }
+
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+
+    // Initially open the "Monthly" tab
+    document.querySelector(".tablinks").click();
+
+</script>

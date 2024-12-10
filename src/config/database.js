@@ -4,7 +4,7 @@ const sql = require('mssql');
 const sqlConfig = {
     user: 'sa', // Tên người dùng của SQL Server (trong trường hợp này là tài khoản 'sa')
     password: '123', // Mật khẩu tài khoản 'sa'
-    database: 'db_sushi', // Tên cơ sở dữ liệu muốn kết nối
+    database: 'db_sushi_2', // Tên cơ sở dữ liệu muốn kết nối
     server: 'localhost', // Sử dụng 'localhost' vì SQL Server đang chạy trong container Docker trên máy của bạn
     port: 1433, // Cổng mặc định SQL Server
     options: {
