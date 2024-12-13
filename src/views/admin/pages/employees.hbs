@@ -126,12 +126,71 @@
   }
 </style>
 
+{{!-- Css cho Filter by Branch --}}
+
+<style>
+  .form-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* Khoảng cách giữa các thành phần */
+    margin-bottom: 20px;
+    /* Khoảng cách phía dưới toàn bộ filter */
+  }
+
+  .form-group label {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 10px;
+    /* Khoảng cách giữa label và dropdown */
+  }
+
+  .form-group select {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-width: 200px;
+  }
+
+  .btn {
+    padding: 5px 15px;
+    background-color: #007bff;
+    /* Màu xanh của nút */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .btn:hover {
+    background-color: #0056b3;
+    /* Màu khi hover */
+  }
+</style>
+
+<form action="/admin/employees" method="GET">
+  <div class="form-group">
+    <label for="MaChiNhanh">Filter by Branch:</label>
+    <select id="MaChiNhanh" name="MaChiNhanh" class="form-control">
+      <option value="">Select Branch</option>
+      {{#each branches}}
+      <option value="{{this.MaCN}}" {{#if (eq this.MaCN ../MaChiNhanh)}}selected{{/if}}>
+        {{this.TenCN}}
+      </option>
+      {{/each}}
+    </select>
+    <button type="submit" class="btn">Filter</button>
+  </div>
+</form>
 
 
 <!-- Admin Dashboard - index.hbs -->
 <div class="flex">
   <!-- Sidebar -->
   {{> admin_partials/sidebar}}
+
 
   <table border="1" cellpadding="10" cellspacing="0" class="employee-table">
     <thead>
