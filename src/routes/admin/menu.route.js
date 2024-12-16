@@ -13,8 +13,8 @@ route.post('/add', menuController.addDish);
 route.get('/edit/:id', menuController.renderEditDishForm);
 route.post('/edit/:id', menuController.editDish);
 
-// // Route xoá món ăn
-// route.post('/delete/:id', menuController.deleteDish);
+// Route xoá món ăn
+route.post('/delete/:id', menuController.deleteDish);
 
 // Route tìm kiếm món ăn
 route.get('/search', menuController.searchDish);

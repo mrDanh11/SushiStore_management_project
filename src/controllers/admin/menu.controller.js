@@ -184,21 +184,50 @@ module.exports.editDish = async (req, res) => {
 };
 
 // Xoá món ăn
+// Xóa món ăn
 module.exports.deleteDish = async (req, res) => {
-    const { id } = req.params;
-
     try {
-        const pool = await poolPromise;
-        await pool.request()
-            .input('MaMon', sql.Char(5), id)
-            .query('DELETE FROM mon_an WHERE MaMon = @MaMon');
+        const { id } = req.params; // Lấy MaMon từ URL
+        const { regionId, branchId } = req.query; // Lấy regionId và branchId từ query params
+        console.log(req.params);
+        if (!id) {
+            return res.status(400).send('Dish ID is required');
+        }
 
+        const pool = await poolPromise;
+
+        // Trường hợp chưa chọn region và branch
+        if (!regionId && !branchId) {
+            // Gọi procedure xoa_mon_an
+            await pool.request()
+                .input('MaMon', sql.Char(5), id)
+                .execute('xoa_mon_an');
+        }
+
+        // Trường hợp chọn branch
+        else if (branchId) {
+            await pool.request()
+                .input('MaCN', sql.Int, branchId)
+                .input('MaMon', sql.Char(5), id)
+                .execute('xoa_mon_an_chi_nhanh');
+        }
+
+        // Trường hợp chọn region
+        else if (regionId) {
+            await pool.request()
+                .input('MaKV', sql.Int, regionId)
+                .input('MaMon', sql.Char(5), id)
+                .execute('xoa_mon_an_khu_vuc');
+        }
+
+        // Sau khi xóa, chuyển hướng về danh sách món ăn
         res.redirect('/admin/menu');
     } catch (error) {
         console.error('Error deleting dish:', error);
         res.status(500).send('Error deleting dish');
     }
 };
+
 
 // Tìm kiếm món ăn
 module.exports.searchDish = async (req, res) => {
@@ -249,3 +278,9 @@ module.exports.searchDish = async (req, res) => {
     }
     
 };
+
+
+// NOTE
+// chưa có trường hợp vừa chọn được khu vực, vừa chọn được chi nhánh
+// chỉ có chi nhánh riêng, khu vực riêng
+// xoá ở route admin/menu nó chưa xoá được
