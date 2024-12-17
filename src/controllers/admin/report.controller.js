@@ -515,7 +515,6 @@ module.exports.getSlowestDishByBranch = async (req, res) => {
 
         const result = await request.query(query);
 
-        // Lấy danh sách chi nhánh để hiển thị dropdown
         const branches = await pool.request().query(`SELECT MaCN, TenCN FROM chi_nhanh`);
 
         res.render('admin/pages/slowestDishes', {
@@ -578,7 +577,6 @@ module.exports.getSlowestDishByRegion = async (req, res) => {
 
         const result = await request.query(query);
 
-        // Lấy danh sách khu vực để hiện thị dropdown
         const regions = await pool.request().query(`SELECT MaKhuVuc, TenKhuVuc FROM khu_vuc`);
 
         res.render('admin/pages/slowestDishes', {
@@ -603,12 +601,11 @@ module.exports.getSlowestDishByBranchAndDate = async (req, res) => {
     try {
         const pool = await poolPromise;
 
-        // Gán giá trị mặc định cho startDate và endDate nếu chưa được nhập
         if (!startDate || isNaN(Date.parse(startDate))) {
-            startDate = new Date().toISOString().split('T')[0]; // Ngày hiện tại
+            startDate = new Date().toISOString().split('T')[0]; 
         }
         if (!endDate || isNaN(Date.parse(endDate))) {
-            endDate = new Date().toISOString().split('T')[0]; // Ngày hiện tại
+            endDate = new Date().toISOString().split('T')[0]; 
         }
 
         let query = `
@@ -622,7 +619,7 @@ module.exports.getSlowestDishByBranchAndDate = async (req, res) => {
                 mon_an ma ON mmpd.MaMon = ma.MaMon
         `;
 
-        // Lọc theo ngày và chi nhánh
+        // lọc theo ngày và chi nhánh
         const conditions = [];
         if (startDate && endDate) {
             conditions.push("pd.NgayDat BETWEEN @StartDate AND @EndDate");
@@ -659,7 +656,7 @@ module.exports.getSlowestDishByBranchAndDate = async (req, res) => {
 
         const result = await request.query(query);
 
-        // Lấy danh sách chi nhánh
+        // danh sách chi nhánh
         const branches = await pool.request().query(`SELECT MaCN, TenCN FROM chi_nhanh`);
 
         res.render('admin/pages/slowestDishes', {

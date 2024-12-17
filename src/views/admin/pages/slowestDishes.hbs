@@ -1,10 +1,8 @@
 <style>
-    /* Header */
     h1.text-3xl {
         color: #2c3e50;
     }
 
-    /* Filter Buttons */
     button[type="submit"] {
         background-color: #3498db;
         color: #ffffff;
@@ -15,7 +13,6 @@
         background-color: #2980b9;
     }
 
-    /* Form Label và Select Box */
     label {
         color: #34495e;
     }
@@ -37,13 +34,11 @@
         box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
     }
 
-    /* Table Header */
     thead {
         background-color: #2c3e50;
         color: #ecf0f1;
     }
 
-    /* Table Rows */
     tbody tr:hover {
         background-color: #f1f1f1;
     }
@@ -80,7 +75,7 @@
 
             <!-- branch Filter -->
             {{#eq filter 'branch'}}
-            <form method="GET" action="/admin/reports/slowest-branch"
+            <form method="GET" action="/admin/reports/food/slowest-branch"
                 class="flex flex-col md:flex-row gap-6 mb-6 items-center">
                 <div class="flex flex-col">
                     <label for="branchId" class="font-medium text-gray-700 mb-1">Select Branch:</label>
@@ -104,7 +99,7 @@
 
             {{!-- khu vực --}}
             {{#eq filter 'region'}}
-            <form method="GET" action="/admin/reports/slowest-region"
+            <form method="GET" action="/admin/reports/food/slowest-region"
                 class="flex flex-col md:flex-row gap-6 mb-6 items-center">
                 <div class="flex flex-col">
                     <label for="regionId" class="font-medium text-gray-700 mb-1">Select Region:</label>
@@ -126,16 +121,44 @@
             </form>
             {{/eq}}
 
+            {{!-- Table for Region --}}
+            {{#eq filter 'region'}}
+            <div class="overflow-x-auto">
+                <table class="table-auto w-full border-collapse border border-gray-200 shadow-sm">
+                    <thead class="bg-blue-600 text-white">
+                        <tr>
+                            <th class="border border-gray-300 p-4 text-left">Dish Name</th>
+                            <th class="border border-gray-300 p-4 text-left">Region</th>
+                            <th class="border border-gray-300 p-4 text-right">Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each dishes}}
+                        <tr class="hover:bg-gray-100">
+                            <td class="border border-gray-300 p-4">{{this.TenMon}}</td>
+                            <td class="border border-gray-300 p-4">{{this.TenKhuVuc}}</td>
+                            <td class="border border-gray-300 p-4 text-right">{{this.SoLuong}}</td>
+                        </tr>
+                        {{/each}}
+                        {{#unless dishes}}
+                        <tr>
+                            <td colspan="3" class="text-center p-6 text-gray-500">No data available.</td>
+                        </tr>
+                        {{/unless}}
+                    </tbody>
+                </table>
+            </div>
+            {{/eq}}
             {{!-- end khu vực --}}
 
-            {{!-- Branch and Date Filter --}}
+            {{!-- branch and date filter --}}
             {{#eq filter 'branch-date'}}
-            <form method="GET" action="/admin/reports/slowest-branch-date"
-                class="flex flex-col md:flex-row  gap-6 mb-6 items-center bg-gray-100 p-4 rounded-lg shadow-md">
+            <form method="GET" action="/admin/reports/food/slowest-branch-date"
+                class="flex flex-col md:flex-row gap-6 mb-6 items-center bg-gray-100 p-4 rounded-lg shadow-md">
                 <div class="flex flex-col">
-                    <label for="branchId" class="font-medium  text-gray-700 mb-1">Select Branch:</label>
+                    <label for="branchId" class="font-medium text-gray-700 mb-1">Select Branch:</label>
                     <select name="branchId" id="branchId"
-                        class="p-2 border border-gray-300  rounded focus:ring-2 focus:ring-blue-500">
+                        class="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                         <option value="">-- All Branches --</option>
                         {{#each branches}}
                         <option value="{{this.MaCN}}" {{#ifCond ../selectedBranch this.MaCN}}selected{{/ifCond}}>
@@ -159,12 +182,8 @@
                     Filter
                 </button>
             </form>
-            {{/eq}}
 
-            {{!-- end branch and Date Filter --}}
-
-
-            <!-- data Table -->
+            {{!-- table for branch-date --}}
             <div class="overflow-x-auto">
                 <table class="table-auto w-full border-collapse border border-gray-200 shadow-sm">
                     <thead class="bg-blue-600 text-white">
@@ -190,6 +209,38 @@
                     </tbody>
                 </table>
             </div>
+            {{/eq}}
+
+            {{!-- table for branch --}}
+            {{#eq filter 'branch'}}
+            <div class="overflow-x-auto">
+                <table class="table-auto w-full border-collapse border border-gray-200 shadow-sm">
+                    <thead class="bg-blue-600 text-white">
+                        <tr>
+                            <th class="border border-gray-300 p-4 text-left">Dish Name</th>
+                            <th class="border border-gray-300 p-4 text-left">Branch</th>
+                            <th class="border border-gray-300 p-4 text-right">Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each dishes}}
+                        <tr class="hover:bg-gray-100">
+                            <td class="border border-gray-300 p-4">{{this.TenMon}}</td>
+                            <td class="border border-gray-300 p-4">{{this.MaCN}}</td>
+                            <td class="border border-gray-300 p-4 text-right">{{this.SoLuong}}</td>
+                        </tr>
+                        {{/each}}
+                        {{#unless dishes}}
+                        <tr>
+                            <td colspan="3" class="text-center p-6 text-gray-500">No data available.</td>
+                        </tr>
+                        {{/unless}}
+                    </tbody>
+                </table>
+            </div>
+            {{/eq}}
+
+
         </div>
     </div>
 </div>
