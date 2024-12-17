@@ -6,13 +6,15 @@ const userController = require("../../controllers/admin/user.controller");
 route.get('/', userController.getUsers);
 
 // Route thêm thẻ
-route.post('/cards/add', userController.addCard);
+route.get('/add', userController.getFormAddUsers);
+route.post('/add', userController.addCard);
 
 // Route xóa thẻ
-route.post('/cards/delete/:MaThe', userController.deleteCard);
+route.post('/delete/:MaThe', userController.deleteCard);
 
 // Route sửa thẻ
-route.post('/cards/edit/:MaThe', userController.editCard);
+route.get('/edit/:MaThe',userController.getEditCard);
+route.post('/edit/:MaThe', userController.editCard);
 
 // Route xử lý tìm kiếm người dùng
 route.get('/search', userController.searchUsers);
