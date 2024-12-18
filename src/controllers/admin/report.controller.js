@@ -74,7 +74,7 @@
 //             quarterlyReport: quarterlyReport.recordset,  // Báo cáo theo quý
 //             yearlyReport: yearlyReport.recordset,  // Báo cáo theo năm
 //         });
-
+        
 //     } catch (error) {
 //         console.error(error);
 //         res.status(500).send('Error fetching revenue report');
@@ -342,7 +342,7 @@
 //             default:
 //                 throw new Error("Invalid report type");
 //         }
-
+        
 
 //         res.render('admin/pages/reports', {
 //             layout: 'admin_layouts/mainAdmin',
@@ -355,7 +355,7 @@
 //         console.error("Detailed Error: ", error); // Ghi lại lỗi chi tiết
 //         res.status(500).send('Error fetching revenue report');
 //     }
-
+    
 // };
 
 
@@ -469,209 +469,4 @@
 //         res.status(500).send('Error fetching yearly report');
 //     }
 // };
-
-
-
-
-// controllers/admin/report.controller.js
-const sql = require('mssql');
-const { poolPromise } = require("../../config/database");
-
-// a. Món bán chậm nhất theo chi nhánh
-module.exports.getSlowestDishByBranch = async (req, res) => {
-    const { branchId } = req.query;
-
-    try {
-        const pool = await poolPromise;
-
-        let query = `
-            SELECT 
-                ma.TenMon, pd.MaCN, SUM(mmpd.SoLuong) AS SoLuong
-            FROM 
-                phieu_dat pd
-            JOIN 
-                ma_mon_phieu_dat mmpd ON pd.MaPhieu = mmpd.MaPhieu
-            JOIN 
-                mon_an ma ON mmpd.MaMon = ma.MaMon
-        `;
-
-        if (branchId) {
-            query += ` WHERE pd.MaCN = @BranchId `;
-        }
-
-        query += `
-            GROUP BY ma.TenMon, pd.MaCN
-            HAVING SUM(mmpd.SoLuong) >= ALL (
-                SELECT SUM(mmpd2.SoLuong)
-                FROM phieu_dat pd2
-                JOIN ma_mon_phieu_dat mmpd2 ON pd2.MaPhieu = mmpd2.MaPhieu
-                WHERE pd2.MaCN = pd.MaCN
-                GROUP BY mmpd2.MaMon
-            )
-        `;
-
-        const request = pool.request();
-        if (branchId) request.input('BranchId', sql.Int, branchId);
-
-        const result = await request.query(query);
-
-        const branches = await pool.request().query(`SELECT MaCN, TenCN FROM chi_nhanh`);
-
-        res.render('admin/pages/slowestDishes', {
-            title: 'Slowest Selling Dish - By Branch',
-            layout: 'admin_layouts/mainAdmin',
-            dishes: result.recordset,
-            branches: branches.recordset,
-            selectedBranch: branchId,
-            filter: 'branch',
-        });
-    } catch (error) {
-        console.error('Error fetching slowest dish by branch:', error);
-        res.status(500).send('Error fetching data');
-    }
-};
-
-
-// b. Món bán chậm nhất theo khu vực
-module.exports.getSlowestDishByRegion = async (req, res) => {
-    const { regionId } = req.query;
-
-    try {
-        const pool = await poolPromise;
-
-        let query = `
-            SELECT 
-                ma.TenMon, kv.TenKhuVuc, kv.MaKhuVuc, SUM(mmpd.SoLuong) AS SoLuong
-            FROM 
-                phieu_dat pd
-            JOIN 
-                ma_mon_phieu_dat mmpd ON pd.MaPhieu = mmpd.MaPhieu
-            JOIN 
-                mon_an ma ON mmpd.MaMon = ma.MaMon
-            JOIN 
-                chi_nhanh cn ON pd.MaCN = cn.MaCN
-            JOIN 
-                khu_vuc kv ON cn.MaKhuVuc = kv.MaKhuVuc
-        `;
-        if (regionId) {
-            query += ` WHERE kv.MaKhuVuc = @RegionId`;
-        }
-
-        query += `
-            GROUP BY 
-                ma.TenMon, kv.TenKhuVuc, kv.MaKhuVuc
-            HAVING 
-                SUM(mmpd.SoLuong) >= ALL (
-                    SELECT SUM(mmpd2.SoLuong)
-                    FROM phieu_dat pd2
-                    JOIN ma_mon_phieu_dat mmpd2 ON pd2.MaPhieu = mmpd2.MaPhieu
-                    JOIN chi_nhanh cn2 ON pd2.MaCN = cn2.MaCN
-                    JOIN khu_vuc kv2 ON cn2.MaKhuVuc = kv2.MaKhuVuc
-                    WHERE kv2.MaKhuVuc = kv.MaKhuVuc
-                    GROUP BY mmpd2.MaMon
-                )
-        `;
-
-        const request = pool.request();
-        if (regionId) request.input('RegionId', sql.Int, regionId);
-
-        const result = await request.query(query);
-
-        const regions = await pool.request().query(`SELECT MaKhuVuc, TenKhuVuc FROM khu_vuc`);
-
-        res.render('admin/pages/slowestDishes', {
-            title: 'Slowest Selling Dish - By Region',
-            layout: 'admin_layouts/mainAdmin',
-            dishes: result.recordset,
-            regions: regions.recordset,
-            selectedRegion: regionId,
-            filter: 'region',
-        });
-    } catch (error) {
-        console.error('Error fetching slowest dish by region:', error);
-        res.status(500).send('Error fetching data');
-    }
-};
-
-
-// c. Món bán chậm nhất theo chi nhánh trong khoảng thời gian
-module.exports.getSlowestDishByBranchAndDate = async (req, res) => {
-    let { startDate, endDate, branchId } = req.query;
-
-    try {
-        const pool = await poolPromise;
-
-        if (!startDate || isNaN(Date.parse(startDate))) {
-            startDate = new Date().toISOString().split('T')[0]; 
-        }
-        if (!endDate || isNaN(Date.parse(endDate))) {
-            endDate = new Date().toISOString().split('T')[0]; 
-        }
-
-        let query = `
-            SELECT 
-                ma.TenMon, pd.MaCN, SUM(mmpd.SoLuong) AS SoLuong
-            FROM 
-                phieu_dat pd
-            JOIN 
-                ma_mon_phieu_dat mmpd ON pd.MaPhieu = mmpd.MaPhieu
-            JOIN 
-                mon_an ma ON mmpd.MaMon = ma.MaMon
-        `;
-
-        // lọc theo ngày và chi nhánh
-        const conditions = [];
-        if (startDate && endDate) {
-            conditions.push("pd.NgayDat BETWEEN @StartDate AND @EndDate");
-        }
-        if (branchId) {
-            conditions.push("pd.MaCN = @BranchId");
-        }
-
-        if (conditions.length > 0) {
-            query += ` WHERE ${conditions.join(" AND ")}`;
-        }
-
-        query += `
-            GROUP BY 
-                ma.TenMon, pd.MaCN
-            HAVING 
-                SUM(mmpd.SoLuong) >= ALL (
-                    SELECT SUM(mmpd2.SoLuong)
-                    FROM phieu_dat pd2
-                    JOIN ma_mon_phieu_dat mmpd2 ON pd2.MaPhieu = mmpd2.MaPhieu
-                    WHERE pd2.MaCN = pd.MaCN
-                    ${startDate && endDate ? "AND pd2.NgayDat BETWEEN @StartDate AND @EndDate" : ""}
-                    GROUP BY mmpd2.MaMon
-                )
-        `;
-
-        const request = pool.request();
-        request.input('StartDate', sql.Date, startDate);
-        request.input('EndDate', sql.Date, endDate);
-
-        if (branchId) {
-            request.input('BranchId', sql.Int, branchId);
-        }
-
-        const result = await request.query(query);
-
-        // danh sách chi nhánh
-        const branches = await pool.request().query(`SELECT MaCN, TenCN FROM chi_nhanh`);
-
-        res.render('admin/pages/slowestDishes', {
-            title: 'Slowest Selling Dish - By Branch and Date Range',
-            layout: 'admin_layouts/mainAdmin',
-            dishes: result.recordset,
-            branches: branches.recordset,
-            startDate,
-            endDate,
-            selectedBranch: branchId,
-            filter: 'branch-date',
-        });
-    } catch (error) {
-        console.error('Error fetching slowest dish by branch and date:', error);
-        res.status(500).send('Error fetching data');
-    }
-};
 

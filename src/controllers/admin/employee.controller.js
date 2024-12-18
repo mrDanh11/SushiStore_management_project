@@ -2,89 +2,46 @@ const sql = require('mssql');
 const { sqlConfig, poolPromise } = require("../../config/database");
 
 
-// module.exports.getAllEmployees = async (req, res) => {
-//     try {
-//         const pool = await poolPromise;
-//         const { MaChiNhanh } = req.query; 
-
-//         let result;
-
-//         if (MaChiNhanh) {
-//             result = await pool.request()
-//                 .input('MaChiNhanh', sql.Int, MaChiNhanh)
-//                 .query(`
-//                     SELECT MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, NgaySinh, Phai, BoPhan, ChiNhanh, Luong
-//                     FROM nhan_vien
-//                     WHERE ChiNhanh = @MaChiNhanh AND DangLamViec = 1
-//                     ORDER BY HoTen ASC
-//                 `);
-//         } else {
-//             result = await pool.request().query(`
-//                 SELECT MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, NgaySinh, Phai, BoPhan, ChiNhanh, Luong
-//                 FROM nhan_vien
-//                 WHERE DangLamViec = 1
-//                 ORDER BY ChiNhanh ASC
-//             `);
-//         }
-
-//         const branches = await pool.request().query(`
-//             SELECT MaCN, TenCN
-//             FROM chi_nhanh
-//         `);
-
-//         res.render('admin/pages/employees', {
-//             layout: 'admin_layouts/mainAdmin',
-//             title: 'Employee Management',
-//             employees: result.recordset, 
-//             branches: branches.recordset, 
-//             MaChiNhanh 
-//         });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).send('Error fetching employees');
-//     }
-// };
-
 module.exports.getAllEmployees = async (req, res) => {
     try {
         const pool = await poolPromise;
-        const { MaChiNhanh } = req.query;
+        const { MaChiNhanh } = req.query; // Lấy MaChiNhanh từ query parameter
 
         let result;
 
+        // Nếu có MaChiNhanh, chỉ lấy nhân viên thuộc chi nhánh đó và DangLamViec = 1
         if (MaChiNhanh) {
             result = await pool.request()
                 .input('MaChiNhanh', sql.Int, MaChiNhanh)
                 .query(`
-                    SELECT nv.MaNV, nv.HoTen, nv.SoNha, nv.Duong, nv.Quan, nv.ThanhPho, nv.NgaySinh, 
-                           nv.Phai, bp.TenBoPhan AS BoPhan, nv.ChiNhanh, nv.Luong
-                    FROM nhan_vien nv
-                    JOIN bo_phan bp ON nv.BoPhan = bp.MaBoPhan
-                    WHERE nv.ChiNhanh = @MaChiNhanh AND nv.DangLamViec = 1
-                    ORDER BY nv.HoTen ASC
+                    SELECT MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, NgaySinh, Phai, BoPhan, ChiNhanh, Luong
+                    FROM nhan_vien
+                    WHERE ChiNhanh = @MaChiNhanh AND DangLamViec = 1
+                    ORDER BY HoTen ASC
                 `);
         } else {
+            // Nếu không có MaChiNhanh, lấy toàn bộ nhân viên đang làm việc
             result = await pool.request().query(`
-                SELECT nv.MaNV, nv.HoTen, nv.SoNha, nv.Duong, nv.Quan, nv.ThanhPho, nv.NgaySinh, 
-                       nv.Phai, bp.TenBoPhan AS BoPhan, nv.ChiNhanh, nv.Luong
-                FROM nhan_vien nv
-                JOIN bo_phan bp ON nv.BoPhan = bp.MaBoPhan
-                WHERE nv.DangLamViec = 1
-                ORDER BY nv.ChiNhanh ASC
+                SELECT MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, NgaySinh, Phai, BoPhan, ChiNhanh, Luong
+                FROM nhan_vien
+                WHERE DangLamViec = 1
+                ORDER BY ChiNhanh ASC
             `);
         }
 
+        // Lấy danh sách chi nhánh để hiển thị trong dropdown
         const branches = await pool.request().query(`
             SELECT MaCN, TenCN
             FROM chi_nhanh
         `);
 
+        // Render ra view với danh sách nhân viên đang làm việc và danh sách chi nhánh
         res.render('admin/pages/employees', {
             layout: 'admin_layouts/mainAdmin',
             title: 'Employee Management',
-            employees: result.recordset,
-            branches: branches.recordset,
-            MaChiNhanh
+            employees: result.recordset, // Danh sách nhân viên
+            branches: branches.recordset, // Danh sách chi nhánh
+            MaChiNhanh // Để giữ trạng thái đã chọn
         });
     } catch (error) {
         console.error(error);
@@ -95,18 +52,20 @@ module.exports.getAllEmployees = async (req, res) => {
 
 
 
-
 // Cập nhật controller để render form thêm nhân viên
 module.exports.showAddEmployeeForm = async (req, res) => {
     try {
         const pool = await sql.connect(sqlConfig);
 
+        // Truy vấn bộ phận
         const departmentsResult = await pool.request().query('SELECT * FROM bo_phan');
         const departments = departmentsResult.recordset;
 
+        // Truy vấn chi nhánh
         const branchesResult = await pool.request().query('SELECT * FROM chi_nhanh');
         const branches = branchesResult.recordset;
 
+        // Render form thêm nhân viên với dữ liệu bộ phận và chi nhánh
         res.render('admin/pages/addEmployee', {
             layout: 'admin_layouts/mainAdmin',
             title: 'Thêm Nhân Viên',
@@ -123,7 +82,9 @@ module.exports.showAddEmployeeForm = async (req, res) => {
 module.exports.addEmployee = async (req, res) => {
     const { MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, NgaySinh, Phai, BoPhan, ChiNhanh } = req.body;
 
+    // Kiểm tra dữ liệu đầu vào
     if (!MaNV || !HoTen || !SoNha || !Duong || !Quan || !ThanhPho || !NgaySinh || !Phai || !BoPhan || !ChiNhanh) {
+        // Trả về form kèm theo thông báo lỗi
         return res.status(400).send('All fields are required.');
     }
 
@@ -171,11 +132,19 @@ module.exports.getEmployeeById = async (req, res) => {
             return res.status(404).send('Employee not found');
         }
         //--
+        // Truy vấn bộ phận
         const departmentsResult = await pool.request().query('SELECT * FROM bo_phan');
         const departments = departmentsResult.recordset;
 
+        // Truy vấn chi nhánh
         const branchesResult = await pool.request().query('SELECT * FROM chi_nhanh');
         const branches = branchesResult.recordset;
+
+        // // Lấy thông tin nhân viên
+        // const employeeResult = await pool.request()
+        //     .input('employeeId', sql.Int, employeeId)
+        //     .query('SELECT * FROM nhan_vien WHERE MaNV = @employeeId');
+        // const employee = employeeResult.recordset[0]; // Giả sử chỉ có 1 kết quả
 
         res.render('admin/pages/editEmployee', {
             employee: result.recordset[0],
@@ -250,7 +219,7 @@ module.exports.getEmployeeById = async (req, res) => {
 //         return res.render('editEmployee', {
 //             errorMessage: 'All fields are required.',
 //             employee: req.body  // Render lại dữ liệu đã nhập
-
+            
 //         });
 //     }
 
@@ -361,86 +330,22 @@ module.exports.getEmployeeById = async (req, res) => {
 
 
 
-// module.exports.editEmployee = async (req, res) => {
-//     const { id } = req.params; // Lấy mã nhân viên từ URL
-//     const { MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, Phai, BoPhan, ChiNhanh, Luong } = req.body;
-
-//     // Kiểm tra dữ liệu đầu vào
-//     if (!MaNV || !HoTen || !SoNha || !Duong || !Quan || !ThanhPho || !Phai || !BoPhan || !ChiNhanh || !Luong) {
-//         return res.render('editEmployee', {
-//             errorMessage: 'All fields are required.',
-//             employee: req.body // Render lại dữ liệu đã nhập
-//         });
-//     }
-
-//     try {
-//         const pool = await sql.connect(sqlConfig);
-
-//         // Lấy thông tin nhân viên hiện tại
-//         const result = await pool.request()
-//             .input('MaNV', sql.Char(5), MaNV)
-//             .query(`
-//                 SELECT ChiNhanh, BoPhan
-//                 FROM nhan_vien
-//                 WHERE MaNV = @MaNV
-//             `);
-
-//         const currentEmployee = result.recordset[0]; // Lấy dữ liệu nhân viên hiện tại
-//         if (!currentEmployee) {
-//             return res.status(404).send('Employee not found');
-//         }
-
-//         const currentChiNhanh = currentEmployee.ChiNhanh;
-//         const currentBoPhan = currentEmployee.BoPhan;
-
-//         // Nếu chi nhánh thay đổi, gọi procedure ChuyenNhanSu
-//         if (currentChiNhanh !== parseInt(ChiNhanh)) {
-//             await pool.request()
-//                 .input('MaNV', sql.Char(5), MaNV)
-//                 .input('MaChiNhanhMoi', sql.Int, ChiNhanh)
-//                 .input('MaBoPhanMoi', sql.Int, BoPhan) // Có thể null
-//                 .execute('ChuyenNhanSu');
-//         }
-
-//         // Cập nhật thông tin nhân viên (ngoại trừ chi nhánh và bộ phận nếu đã xử lý qua procedure)
-//         await pool.request()
-//             .input('MaNV', sql.Char(5), MaNV)
-//             .input('HoTen', sql.NVarChar, HoTen)
-//             .input('SoNha', sql.NVarChar, SoNha)
-//             .input('Duong', sql.NVarChar, Duong)
-//             .input('Quan', sql.NVarChar, Quan)
-//             .input('ThanhPho', sql.NVarChar, ThanhPho)
-//             .input('Phai', sql.NVarChar, Phai)
-//             .input('Luong', sql.Float, Luong)
-//             .input('BoPhan', sql.Int, BoPhan) 
-//             .query(`
-//                 UPDATE nhan_vien
-//                 SET HoTen = @HoTen, SoNha = @SoNha, Duong = @Duong, Quan = @Quan,
-//                     ThanhPho = @ThanhPho, Phai = @Phai, Luong = @Luong
-//                 WHERE MaNV = @MaNV
-//             `);
-
-//         res.redirect('/admin/employees'); 
-//     } catch (error) {
-//         console.error('Error updating employee:', error);
-//         res.status(500).send('Error updating employee');
-//     }
-// };
-
 module.exports.editEmployee = async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.params; // Lấy mã nhân viên từ URL
     const { MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, Phai, BoPhan, ChiNhanh, Luong } = req.body;
 
+    // Kiểm tra dữ liệu đầu vào
     if (!MaNV || !HoTen || !SoNha || !Duong || !Quan || !ThanhPho || !Phai || !BoPhan || !ChiNhanh || !Luong) {
         return res.render('editEmployee', {
             errorMessage: 'All fields are required.',
-            employee: req.body
+            employee: req.body // Render lại dữ liệu đã nhập
         });
     }
 
     try {
         const pool = await sql.connect(sqlConfig);
 
+        // Lấy thông tin nhân viên hiện tại
         const result = await pool.request()
             .input('MaNV', sql.Char(5), MaNV)
             .query(`
@@ -449,7 +354,7 @@ module.exports.editEmployee = async (req, res) => {
                 WHERE MaNV = @MaNV
             `);
 
-        const currentEmployee = result.recordset[0];
+        const currentEmployee = result.recordset[0]; // Lấy dữ liệu nhân viên hiện tại
         if (!currentEmployee) {
             return res.status(404).send('Employee not found');
         }
@@ -457,14 +362,16 @@ module.exports.editEmployee = async (req, res) => {
         const currentChiNhanh = currentEmployee.ChiNhanh;
         const currentBoPhan = currentEmployee.BoPhan;
 
-        if (currentChiNhanh !== parseInt(ChiNhanh) || currentBoPhan !== parseInt(BoPhan)) {
+        // Nếu chi nhánh thay đổi, gọi procedure ChuyenNhanSu
+        if (currentChiNhanh !== parseInt(ChiNhanh)) {
             await pool.request()
                 .input('MaNV', sql.Char(5), MaNV)
                 .input('MaChiNhanhMoi', sql.Int, ChiNhanh)
-                .input('MaBoPhanMoi', sql.Int, BoPhan)
+                .input('MaBoPhanMoi', sql.Int, BoPhan) // Có thể null
                 .execute('ChuyenNhanSu');
         }
 
+        // Cập nhật thông tin nhân viên (ngoại trừ chi nhánh và bộ phận nếu đã xử lý qua procedure)
         await pool.request()
             .input('MaNV', sql.Char(5), MaNV)
             .input('HoTen', sql.NVarChar, HoTen)
@@ -474,22 +381,19 @@ module.exports.editEmployee = async (req, res) => {
             .input('ThanhPho', sql.NVarChar, ThanhPho)
             .input('Phai', sql.NVarChar, Phai)
             .input('Luong', sql.Float, Luong)
-            .input('BoPhan', sql.Int, BoPhan)
             .query(`
                 UPDATE nhan_vien
                 SET HoTen = @HoTen, SoNha = @SoNha, Duong = @Duong, Quan = @Quan,
-                    ThanhPho = @ThanhPho, Phai = @Phai, Luong = @Luong, BoPhan = @BoPhan
+                    ThanhPho = @ThanhPho, Phai = @Phai, Luong = @Luong
                 WHERE MaNV = @MaNV
             `);
 
-        res.redirect('/admin/employees');
+        res.redirect('/admin/employees'); // Sau khi cập nhật xong, chuyển hướng về danh sách nhân viên
     } catch (error) {
         console.error('Error updating employee:', error);
-        // res.status(500).send('Error updating employee');
-        res.redirect('/admin/employees');
+        res.status(500).send('Error updating employee');
     }
 };
-
 
 
 
@@ -500,21 +404,22 @@ module.exports.editEmployee = async (req, res) => {
 // // Xóa nhân viên
 module.exports.deleteEmployee = async (req, res) => {
     try {
-        const { id } = req.params;
-        console.log('Request Params:', req.params);
+        const { id } = req.params; // Lấy MaNV từ URL params
+        console.log('Request Params:', req.params); // Kiểm tra giá trị params
 
 
         if (!id) {
-            return res.status(400).send('Employee ID is required');
+            return res.status(400).send('Employee ID is required'); // Kiểm tra nếu không có MaNV
         }
 
         const pool = await poolPromise;
 
+        // Gọi procedure xoa_nhan_vien
         await pool.request()
             .input('MaNV', sql.Char(5), id)
             .execute('xoa_nhan_vien');
 
-        res.redirect('/admin/employees');
+        res.redirect('/admin/employees'); // Redirect về trang danh sách nhân viên sau khi xoá
     } catch (error) {
         console.error('Error deleting employee:', error);
         res.status(500).send('Error deleting employee');
@@ -524,13 +429,14 @@ module.exports.deleteEmployee = async (req, res) => {
 
 // tìm kiếm nhân viên
 module.exports.searchEmployee = async (req, res) => {
-    const { searchTerm } = req.query;
+    const { searchTerm } = req.query; // Lấy từ query string
 
     try {
         const pool = await sql.connect(sqlConfig);
 
+        // Truy vấn tìm kiếm nhân viên với các thông tin có thể tìm kiếm
         const result = await pool.request()
-            .input('searchTerm', sql.NVarChar, `%${searchTerm}%`)
+            .input('searchTerm', sql.NVarChar, `%${searchTerm}%`) // Dùng '%' để tìm kiếm với từ khóa bất kỳ
             .query(`
                 SELECT 
                     MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, NgaySinh, Phai, BoPhan, ChiNhanh, Luong
@@ -551,7 +457,7 @@ module.exports.searchEmployee = async (req, res) => {
             layout: 'admin_layouts/mainAdmin',
             title: 'Employee Management',
             employees: result.recordset,
-            searchTerm: searchTerm
+            searchTerm: searchTerm // Truyền từ khóa tìm kiếm về view
         });
     } catch (error) {
         console.error(error);
