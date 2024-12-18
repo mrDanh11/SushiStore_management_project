@@ -1,1 +1,7 @@
-# SushiStore_management_project
+# SushiStore_management
+
+Routing: 
+-> index
+    |
+    |
+    ------> /admin
