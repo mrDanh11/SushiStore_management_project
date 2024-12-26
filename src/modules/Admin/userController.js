@@ -59,10 +59,10 @@ module.exports = {
             const pool = await poolPromise;
 
             const result = await pool.request()
-                .input('MaThe', sql.Char(5), MaThe)
+                .input('MaThe', sql.Char(6), MaThe)
                 .input('CCCD', sql.Char(12), CCCD)
                 .input('LoaiThe', sql.VarChar(10), LoaiThe)
-                .input('NhanVienLap', sql.Char(5), NhanVienLap)
+                .input('NhanVienLap', sql.Char(6), NhanVienLap)
                 .execute('TaoTheMoi');
 
             const maTheMoi = result.recordset[0]?.MaTheMoi || 'N/A';
@@ -87,7 +87,7 @@ module.exports = {
             const pool = await poolPromise;
 
             await pool.request()
-                .input('MaThe', sql.Char(5), MaThe)
+                .input('MaThe', sql.Char(6), MaThe)
                 .query('DELETE FROM the WHERE MaThe = @MaThe');
 
             res.redirect('/admin/users');
@@ -105,10 +105,15 @@ module.exports = {
             const pool = await poolPromise;
 
             const result = await pool.request()
-                .input('MaThe', sql.Char(5), MaThe)
+                .input('MaThe', sql.Char(6), MaThe)
                 .query(`SELECT * FROM the WHERE MaThe = @MaThe`);
 
             const card = result.recordset[0];
+
+            if (card && card.NgayLap) {
+                const date = new Date(card.NgayLap);
+                card.NgayLap = date.toISOString().split('T')[0];
+            }
 
             res.render('AdminPage/editUser', {
                 title: 'Edit Card',
@@ -121,7 +126,6 @@ module.exports = {
         }
     },
 
-
     // sửa thông tin thẻ
     editCard: async (req, res) => {
         const { MaThe } = req.params;
@@ -131,7 +135,7 @@ module.exports = {
             const pool = await poolPromise;
 
             await pool.request()
-                .input('MaThe', sql.Char(5), MaThe)
+                .input('MaThe', sql.Char(6), MaThe)
                 .input('NgayLap', sql.DateTime, NgayLap)
                 .input('LoaiThe', sql.VarChar(10), LoaiThe)
                 .input('TieuDung', sql.Float, TieuDung)

@@ -79,13 +79,12 @@ module.exports.addDish = async (req, res) => {
 
         // Gọi procedure them_mon_an
         await pool.request()
-            .input('MaMon', sql.Char(5), MaMon)
+            .input('MaMon', sql.Char(6), MaMon)
             .input('TenMon', sql.NVarChar(50), TenMon)
             .input('Gia', sql.Int, Gia)
             .input('Loai', sql.NVarChar(50), Loai)
-            .execute('them_mon_an'); // Sử dụng procedure
+            .execute('them_mon_an'); 
 
-        // Sau khi thêm thành công, chuyển hướng về trang menu
         res.redirect('/admin/menu');
     } catch (error) {
         console.error('Error adding dish:', error);
@@ -107,7 +106,7 @@ module.exports.renderEditDishForm = async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('MaMon', sql.Char(5), id)
+            .input('MaMon', sql.Char(6), id)
             .query('SELECT * FROM mon_an WHERE MaMon = @MaMon');
 
         if (result.recordset.length === 0) {
@@ -142,7 +141,7 @@ module.exports.editDish = async (req, res) => {
     try {
         const pool = await poolPromise;
         await pool.request()
-            .input('MaMon', sql.Char(5), id)
+            .input('MaMon', sql.Char(6), id)
             .input('TenMon', sql.NVarChar(50), TenMon)
             .input('Gia', sql.Int, Gia)
             .input('Loai', sql.NVarChar(50), Loai)
@@ -172,7 +171,7 @@ module.exports.deleteDish = async (req, res) => {
         if (!regionId && !branchId) {
             // Gọi procedure xoa_mon_an
             await pool.request()
-                .input('MaMon', sql.Char(5), id)
+                .input('MaMon', sql.Char(6), id)
                 .execute('xoa_mon_an');
         }
 
@@ -180,7 +179,7 @@ module.exports.deleteDish = async (req, res) => {
         else if (branchId) {
             await pool.request()
                 .input('MaCN', sql.Int, branchId)
-                .input('MaMon', sql.Char(5), id)
+                .input('MaMon', sql.Char(6), id)
                 .execute('xoa_mon_an_chi_nhanh');
         }
 
@@ -188,7 +187,7 @@ module.exports.deleteDish = async (req, res) => {
         else if (regionId) {
             await pool.request()
                 .input('MaKV', sql.Int, regionId)
-                .input('MaMon', sql.Char(5), id)
+                .input('MaMon', sql.Char(6), id)
                 .execute('xoa_mon_an_khu_vuc');
         }
 
@@ -220,7 +219,7 @@ module.exports.searchDish = async (req, res) => {
         if (searchBy === 'maMon') {
             // Tìm kiếm theo mã món
             result = await pool.request()
-                .input('ma_mon', sql.Char(5), searchInput)
+                .input('ma_mon', sql.Char(6), searchInput)
                 .execute('tim_mon_an_ma_mon');
         } else if (searchBy === 'tenMon') {
             // Tìm kiếm theo tên món

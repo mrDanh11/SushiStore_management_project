@@ -5,7 +5,7 @@ const { config,poolPromise } = require("../../config/db");
 module.exports.getAllEmployees = async (req, res) => {
     try {
         const pool = await poolPromise;
-        const { MaChiNhanh } = req.query; // Lấy MaChiNhanh từ query parameter
+        const { MaChiNhanh } = req.query; 
 
         let result;
 
@@ -124,7 +124,7 @@ module.exports.getEmployeeById = async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('MaNV', sql.NVarChar, id)
+            .input('MaNV', sql.Char(6), id)
             .query(`SELECT * FROM nhan_vien WHERE MaNV = @MaNV`);
 
         if (result.recordset.length === 0) {
@@ -154,14 +154,14 @@ module.exports.getEmployeeById = async (req, res) => {
 };
 
 module.exports.editEmployee = async (req, res) => {
-    const { id } = req.params; // Lấy mã nhân viên từ URL
+    const { id } = req.params; 
     const { MaNV, HoTen, SoNha, Duong, Quan, ThanhPho, Phai, BoPhan, ChiNhanh, Luong } = req.body;
 
     // Kiểm tra dữ liệu đầu vào
     if (!MaNV || !HoTen || !SoNha || !Duong || !Quan || !ThanhPho || !Phai || !BoPhan || !ChiNhanh || !Luong) {
         return res.render('editEmployee', {
             errorMessage: 'All fields are required.',
-            employee: req.body // Render lại dữ liệu đã nhập
+            employee: req.body 
         });
     }
 
@@ -170,14 +170,14 @@ module.exports.editEmployee = async (req, res) => {
 
         // Lấy thông tin nhân viên hiện tại
         const result = await pool.request()
-            .input('MaNV', sql.Char(5), MaNV)
+            .input('MaNV', sql.Char(6), MaNV)
             .query(`
                 SELECT ChiNhanh, BoPhan
                 FROM nhan_vien
                 WHERE MaNV = @MaNV
             `);
 
-        const currentEmployee = result.recordset[0]; // Lấy dữ liệu nhân viên hiện tại
+        const currentEmployee = result.recordset[0]; 
         if (!currentEmployee) {
             return res.status(404).send('Employee not found');
         }
@@ -188,7 +188,7 @@ module.exports.editEmployee = async (req, res) => {
         // Nếu chi nhánh thay đổi, gọi procedure ChuyenNhanSu
         if (currentChiNhanh !== parseInt(ChiNhanh)) {
             await pool.request()
-                .input('MaNV', sql.Char(5), MaNV)
+                .input('MaNV', sql.Char(6), MaNV)
                 .input('MaChiNhanhMoi', sql.Int, ChiNhanh)
                 .input('MaBoPhanMoi', sql.Int, BoPhan) // Có thể null
                 .execute('ChuyenNhanSu');
@@ -196,7 +196,7 @@ module.exports.editEmployee = async (req, res) => {
 
         // Cập nhật thông tin nhân viên (ngoại trừ chi nhánh và bộ phận nếu đã xử lý qua procedure)
         await pool.request()
-            .input('MaNV', sql.Char(5), MaNV)
+            .input('MaNV', sql.Char(6), MaNV)
             .input('HoTen', sql.NVarChar, HoTen)
             .input('SoNha', sql.NVarChar, SoNha)
             .input('Duong', sql.NVarChar, Duong)
@@ -211,7 +211,7 @@ module.exports.editEmployee = async (req, res) => {
                 WHERE MaNV = @MaNV
             `);
 
-        res.redirect('/admin/employees'); // Sau khi cập nhật xong, chuyển hướng về danh sách nhân viên
+        res.redirect('/admin/employees'); 
     } catch (error) {
         console.error('Error updating employee:', error);
         res.status(500).send('Error updating employee');
@@ -239,7 +239,7 @@ module.exports.deleteEmployee = async (req, res) => {
 
         // Gọi procedure xoa_nhan_vien
         await pool.request()
-            .input('MaNV', sql.Char(5), id)
+            .input('MaNV', sql.Char(6), id)
             .execute('xoa_nhan_vien');
 
         res.redirect('/admin/employees'); // Redirect về trang danh sách nhân viên sau khi xoá
