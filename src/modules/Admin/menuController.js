@@ -65,7 +65,6 @@ module.exports.renderAddDishForm = async(req, res)=>{
 module.exports.addDish = async (req, res) => {
     const { MaMon, TenMon, Gia, Loai } = req.body;
 
-    // Kiểm tra các trường nhập liệu
     if (!MaMon || !TenMon || !Gia || !Loai) {
         return res.render('AdminPage/addDish', {
             layout: 'Admin/AdminMain',
@@ -89,11 +88,92 @@ module.exports.addDish = async (req, res) => {
     } catch (error) {
         console.error('Error adding dish:', error);
 
-        // Render lại trang thêm món ăn với thông báo lỗi
         res.render('AdminPage/addDish', {
             layout: 'Admin/AdminMain',
             title: 'Add Dish',
             errorMessage: 'An error occurred while adding the dish. Please try again.',
+        });
+    }
+};
+
+// form thêm món ăn chi nhánh
+module.exports.renderAddDishToBranchesForm = async(req, res)=>{
+    res.render('AdminPage/addDishToBranch', {
+        layout: 'Admin/AdminMain',
+        title: 'Menu Management',
+    });
+}
+
+// Thêm món ăn vào chi nhánh
+module.exports.addDishToBranch = async (req, res) => {
+    const { MaCN, MaMon, GiaoHang } = req.body;
+
+    if (!MaCN || !MaMon || GiaoHang === undefined) {
+        return res.render('AdminPage/addDishToBranch', {
+            layout: 'Admin/AdminMain',
+            title: 'Add Dish to Branch',
+            errorMessage: 'All fields are required.',
+        });
+    }
+
+    try {
+        const pool = await poolPromise;
+
+        // Gọi procedure them_mon_an_chi_nhanh
+        await pool.request()
+            .input('MaCN', sql.Int, MaCN)
+            .input('MaMon', sql.Char(6), MaMon)
+            .input('GiaoHang', sql.Bit, GiaoHang)
+            .execute('them_mon_an_chi_nhanh');
+
+        res.redirect('/admin/menu'); 
+    } catch (error) {
+        console.error('Error adding dish to branch:', error);
+
+        res.render('AdminPage/addDishToBranch', {
+            layout: 'Admin/AdminMain',
+            title: 'Add Dish to Branch',
+            errorMessage: 'An error occurred while adding the dish to the branch. Please try again.',
+        });
+    }
+};
+
+// form thêm món ăn khu vực
+module.exports.renderAddDishToRegionForm = async(req, res)=>{
+    res.render('AdminPage/addDishToRegion', {
+        layout: 'Admin/AdminMain',
+        title: 'Menu Management',
+    });
+}
+// thêm món ăn khu vực
+module.exports.addDishToRegion = async (req, res) => {
+    const { MaMon, MaKV } = req.body;
+
+    if (!MaMon || !MaKV) {
+        return res.render('AdminPage/addDishToRegion', {
+            layout: 'Admin/AdminMain',
+            title: 'Add Dish to Region',
+            errorMessage: 'All fields are required.',
+        });
+    }
+
+    try {
+        const pool = await poolPromise;
+
+        // Gọi procedure them_mon_an_khu_vuc
+        await pool.request()
+            .input('MaMon', sql.Char(6), MaMon)
+            .input('MaKV', sql.Int, MaKV)
+            .execute('them_mon_an_khu_vuc');
+
+        res.redirect('/admin/menu'); 
+    } catch (error) {
+        console.error('Error adding dish to region:', error);
+
+        res.render('AdminPage/addDishToRegion', {
+            layout: 'Admin/AdminMain',
+            title: 'Add Dish to Region',
+            errorMessage: 'An error occurred while adding the dish to the region. Please try again.',
         });
     }
 };
@@ -154,50 +234,90 @@ module.exports.editDish = async (req, res) => {
     }
 };
 
+// // Xoá món ăn
+// module.exports.deleteDish = async (req, res) => {
+//     try {
+//         const { id } = req.params; 
+//         const { regionId, branchId } = req.query; 
+//         console.log(req.params);
+//         if (!id) {
+//             return res.status(400).send('Dish ID is required');
+//         }
+
+//         const pool = await poolPromise;
+
+//         if (!regionId && !branchId) {
+//             await pool.request()
+//                 .input('MaMon', sql.Char(6), id)
+//                 .execute('xoa_mon_an');
+//         }
+
+//         else if (branchId) {
+//             await pool.request()
+//                 .input('MaCN', sql.Int, branchId)
+//                 .input('MaMon', sql.Char(6), id)
+//                 .execute('xoa_mon_an_chi_nhanh');
+//         }
+
+//         else if (regionId) {
+//             await pool.request()
+//                 .input('MaKV', sql.Int, regionId)
+//                 .input('MaMon', sql.Char(6), id)
+//                 .execute('xoa_mon_an_khu_vuc');
+//         }
+
+//         res.redirect('/admin/menu');
+//     } catch (error) {
+//         console.error('Error deleting dish:', error);
+//         res.status(500).send('Error deleting dish');
+//     }
+// };
+
 // Xoá món ăn
-// Xóa món ăn
 module.exports.deleteDish = async (req, res) => {
     try {
-        const { id } = req.params; // Lấy MaMon từ URL
-        const { regionId, branchId } = req.query; // Lấy regionId và branchId từ query params
-        console.log(req.params);
+        const { id } = req.params; // Lấy mã món ăn
+        const { regionId, branchId } = req.body; // Lấy khu vực hoặc chi nhánh từ body của form
+
+        console.log("regionID:", regionId);
+        console.log("branchId:", branchId);
+
         if (!id) {
             return res.status(400).send('Dish ID is required');
         }
 
         const pool = await poolPromise;
 
-        // Trường hợp chưa chọn region và branch
+        // Nếu không có `regionId` hoặc `branchId`, xoá món ăn khỏi toàn bộ hệ thống
         if (!regionId && !branchId) {
-            // Gọi procedure xoa_mon_an
             await pool.request()
                 .input('MaMon', sql.Char(6), id)
-                .execute('xoa_mon_an');
+                .execute('xoa_mon_an'); // Xoá món khỏi toàn hệ thống
         }
-
-        // Trường hợp chọn branch
+        // Nếu có `branchId`, chỉ xoá món khỏi chi nhánh
         else if (branchId) {
             await pool.request()
                 .input('MaCN', sql.Int, branchId)
                 .input('MaMon', sql.Char(6), id)
-                .execute('xoa_mon_an_chi_nhanh');
+                .execute('xoa_mon_an_chi_nhanh'); // Xoá món khỏi chi nhánh cụ thể
         }
-
-        // Trường hợp chọn region
+        // Nếu có `regionId`, chỉ xoá món khỏi khu vực
         else if (regionId) {
             await pool.request()
                 .input('MaKV', sql.Int, regionId)
                 .input('MaMon', sql.Char(6), id)
-                .execute('xoa_mon_an_khu_vuc');
+                .execute('xoa_mon_an_khu_vuc'); // Xoá món khỏi khu vực cụ thể
         }
 
-        // Sau khi xóa, chuyển hướng về danh sách món ăn
-        res.redirect('/admin/menu');
+        // Chuyển hướng lại trang menu
+        res.redirect(req.headers.referer || '/admin/menu'); // Giữ lại trạng thái route hiện tại
     } catch (error) {
         console.error('Error deleting dish:', error);
         res.status(500).send('Error deleting dish');
     }
 };
+
+
 
 
 // Tìm kiếm món ăn
@@ -233,7 +353,7 @@ module.exports.searchDish = async (req, res) => {
         res.render('AdminPage/menu', {
             layout: 'Admin/AdminMain',
             title: 'Menu Management',
-            dishes: result.recordset, // Hiển thị kết quả tìm kiếm
+            dishes: result.recordset, 
         });
     } catch (error) {
        // console.error('Error searching dish:', error);
@@ -243,8 +363,8 @@ module.exports.searchDish = async (req, res) => {
             layout: 'Admin/AdminMain',
             title: 'Dish Search',
             errorMessage: 'No dishes found matching the search criteria.',
-            dishes: [], // Trả về danh sách rỗng
-            searchTerm: req.body.searchTerm // Để giữ trạng thái tìm kiếm
+            dishes: [], 
+            searchTerm: req.body.searchTerm 
         });
     }
     
