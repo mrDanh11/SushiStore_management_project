@@ -12,6 +12,8 @@ const config = {
     }
 };
 
+
+
 const poolPromise = new mssql.ConnectionPool(config).connect()
 
 module.exports = {
