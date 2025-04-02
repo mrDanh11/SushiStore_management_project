@@ -27,6 +27,7 @@ const CustomerRoute = require("./src/routes/Customer/indexRoutes");
 const AdminRoute = require("./src/routes/Admin/indexRoutes");
 const UnloginRoute = require("./src/routes/Unlogin/indexRoutes");
 
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -84,3 +85,6 @@ AdminRoute(app);
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+
+
