@@ -48,7 +48,7 @@ const Reserve = {
         VALUES ('${MaxMPs}', '${date}', ${branchId}, 'NV001', '${cccd}', 2);
 
 		INSERT INTO dat_ban_online (MaPhieu, KhuVuc, SoLuongKhach, GioDen, GhiChu)
-        VALUES ('${MaxMPs}', ${khuvucId}, ${guestCount},'${time}', '${note}');
+        VALUES ('${MaxMPs}', ${khuvucId}, ${guestCount},'${time}', N'${note}');
 		`;
 
 		const sqlMMPD = orderDetails.map(element => `
@@ -174,8 +174,9 @@ const Reserve = {
 				FROM nhan_vien nv
 				WHERE nv.MaNV = '${employeeID}'
 			)
-			AND YEAR(pd.NgayDat) = YEAR(GETDATE());
+			AND MONTH(pd.NgayDat) = MONTH(GETDATE());
         `;
+		console.log(doanhThuQuery)
         const doanhThu = await pool.request().query(doanhThuQuery);
 		try {
 			return {
