@@ -17,6 +17,7 @@ SushiStore Management is a restaurant management application designed to optimiz
 - ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white) - Markup language
 - ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white) - Styling
 - ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) - Client-side scripting
+- ![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) - Utility-first CSS framework
 
 ### **Architecture**
 - MVC (Model-View-Controller) pattern
@@ -51,13 +52,21 @@ Open your browser and visit `http://localhost:8080`
 ## 📷 Screenshots
 
 ![alt text]({Admin}.png)
+
 ![alt text]({Home}.png)
+
 ![alt text]({CustomerView}.png)
 ---
 
 ---
 
 ## 🤝 Contact
-- 📧 Email: your-email@example.com
-- 🌍 Website: your-website.com
+- 📧 Email: danhnguyen01112@gmail.com
+
+
+
+
+
+
+
 
